@@ -325,9 +325,13 @@
         <div class="search-filters">
             <div class="row">
                 <div class="col-md-4">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" id="searchInput" placeholder="Search categories...">
+                    <div class="form-floating position-relative">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search categories..." autocomplete="off">
                         <label for="searchInput">Search Categories</label>
+                        <button type="button" id="clearSearch" class="btn btn-sm btn-outline-secondary position-absolute" 
+                                style="right: 10px; top: 50%; transform: translateY(-50%); display: none; z-index: 10; border: none; background: transparent; color: #6c757d;">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -353,8 +357,8 @@
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-primary w-100" onclick="searchCategories()">
-                        <i class="fas fa-search"></i> Search
+                    <button class="btn btn-outline-primary w-100" onclick="clearAllFilters()">
+                        <i class="fas fa-undo"></i> Clear All
                     </button>
                 </div>
             </div>
@@ -538,6 +542,40 @@
                         deleteCategory(parseInt(categoryId));
                     }
                 }
+            });
+            
+            // Live search functionality
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const levelFilter = document.getElementById('levelFilter');
+            const clearSearchBtn = document.getElementById('clearSearch');
+            
+            let searchTimeout;
+            
+            // Search as you type with debouncing
+            searchInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                
+                // Show/hide clear button
+                clearSearchBtn.style.display = value ? 'block' : 'none';
+                
+                // Debounce search to avoid too many requests
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchCategories();
+                }, 300); // Wait 300ms after user stops typing
+            });
+            
+            // Live filter updates
+            statusFilter.addEventListener('change', searchCategories);
+            levelFilter.addEventListener('change', searchCategories);
+            
+            // Clear search functionality
+            clearSearchBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                this.style.display = 'none';
+                searchCategories();
+                searchInput.focus();
             });
         });
 
@@ -1239,10 +1277,43 @@
                 .then(data => {
                     if (data.success) {
                         categories = data.categories;
+                        window.categories = categories; // Update global reference
                         renderCategories();
-                        Swal.fire('Search Results', `Found ${data.categories.length} categories`, 'info');
+                        
+                        // Only show success message for substantial searches, not live typing
+                        if (query.length > 2 || status || level) {
+                            console.log(`Search completed: ${data.categories.length} categories found`);
+                        }
+                    } else {
+                        Swal.fire('Error', 'Search failed', 'error');
                     }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    Swal.fire('Error', 'Search failed', 'error');
                 });
+        }
+        
+        function clearAllFilters() {
+            // Clear all input fields
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('levelFilter').value = '';
+            document.getElementById('clearSearch').style.display = 'none';
+            
+            // Trigger search to show all categories
+            searchCategories();
+            
+            // Focus search input
+            document.getElementById('searchInput').focus();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Filters Cleared',
+                text: 'All search filters have been reset',
+                timer: 1500,
+                showConfirmButton: false
+            });
         }
 
         // Auto-save expand state when page is unloaded
