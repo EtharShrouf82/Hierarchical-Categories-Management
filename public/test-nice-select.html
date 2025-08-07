@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Nice Select Test</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css"
+            rel="stylesheet"
+        />
+        <style>
+            .nice-select {
+                width: 100%;
+                z-index: 9999 !important;
+            }
+
+            .nice-select .list {
+                z-index: 10000 !important;
+                max-height: 300px;
+                overflow-y: auto;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                position: absolute !important;
+                top: 100% !important;
+                left: 0 !important;
+                right: 0 !important;
+                background: white !important;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                display: none;
+            }
+
+            .nice-select.open .list {
+                display: block !important;
+                z-index: 10000 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+
+            .nice-select .option {
+                padding: 8px 12px;
+                white-space: nowrap;
+            }
+
+            .nice-select .option.hierarchy-level-1 {
+                padding-left: 24px;
+            }
+
+            .nice-select .option.hierarchy-level-2 {
+                padding-left: 36px;
+            }
+
+            .nice-select .option.hierarchy-level-3 {
+                padding-left: 48px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container py-4">
+            <h2>Nice Select Test</h2>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="testSelect"
+                        >Test Hierarchical Categories:</label
+                    >
+                    <select id="testSelect" class="form-select">
+                        <option value="">Select category...</option>
+                        <option value="1000">Palestine</option>
+                        <option value="1003" class="hierarchy-level-1">
+                            → Hebron
+                        </option>
+                        <option value="1004" class="hierarchy-level-2">
+                            → → Nuba
+                        </option>
+                        <option value="1005" class="hierarchy-level-3">
+                            → → → Nuba School
+                        </option>
+                        <option value="1001">Jordan</option>
+                        <option value="1006" class="hierarchy-level-1">
+                            → Amman
+                        </option>
+                        <option value="1002">Syria</option>
+                        <option value="1007" class="hierarchy-level-1">
+                            → Alepo
+                        </option>
+                        <option value="1008" class="hierarchy-level-2">
+                            → → Alepo 2
+                        </option>
+                        <option value="1009" class="hierarchy-level-3">
+                            → → → Alepo 3
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button class="btn btn-primary" onclick="testNiceSelect()">
+                    Test Nice Select
+                </button>
+                <button class="btn btn-secondary" onclick="destroyNiceSelect()">
+                    Destroy
+                </button>
+                <button class="btn btn-success" onclick="recreateNiceSelect()">
+                    Recreate
+                </button>
+            </div>
+
+            <div class="mt-3">
+                <div id="debug"></div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"></script>
+
+        <script>
+            $(document).ready(function () {
+                console.log("Initializing nice select...");
+                $("#testSelect").niceSelect();
+
+                // Debug clicks
+                $(document).on("click", ".nice-select", function () {
+                    console.log("Nice select clicked");
+                    console.log("Has open class:", $(this).hasClass("open"));
+                    $("#debug").html("Clicked: " + $(this).hasClass("open"));
+                });
+            });
+
+            function testNiceSelect() {
+                console.log("Testing nice select...");
+                $("#testSelect").val("1003").trigger("change");
+                $("#testSelect").niceSelect("update");
+            }
+
+            function destroyNiceSelect() {
+                $("#testSelect").niceSelect("destroy");
+            }
+
+            function recreateNiceSelect() {
+                $("#testSelect").niceSelect();
+            }
+        </script>
+    </body>
+</html>
